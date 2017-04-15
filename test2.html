@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test page</title>
+	 
+	<script type="text/javascript" src="search_places.js" ></script>
+	<script type="text/javascript">
+		function places_search_list() 
+			{
+			  var client_location = {lat:26.872903 , lng: 80.881776};
+
+
+			  map = new google.maps.Map(document.getElementById('map'), 
+																	  	{
+																	      center: client_location,
+																	      zoom: 15
+																	    });
+			  var x = document.getElementById("demo");
+
+
+			  var request = {
+			    location: client_location,
+			    radius: '5000',
+			    //types: ['store']
+			    type: 'atm'
+			  };
+
+			  infowindow = new google.maps.InfoWindow();
+			  
+			  service = new google.maps.places.PlacesService(map);
+			  service.nearbySearch(request, process_searches);
+			}
+
+	function process_searches(results, status) 
+	{
+		var x = document.getElementById("demo");
+        if (status === google.maps.places.PlacesServiceStatus.OK) 
+        {
+	           results_global = results;
+	        for(var i = 0; i < results.length; i++)
+	          {
+	          		var ind_result = results_global[i];
+	          		//console.log(ind_result.formatted_address);
+	          		//document.write(ind_result.formatted_address);
+	          		x.innerHTML += "Index : " + i + "  ";
+	          		x.innerHTML += "Name  : " + ind_result.name + "<br>";
+	          		x.innerHTML += "lat long (" + ind_result.geometry.location + " , " + ind_result.geometry.location + "<br>";
+	          		x.innerHTML += "Address : " + ind_result.formatted_address + "<br><br>";
+
+	          		//render on screen
+
+	          }
+        }
+      }
+	</script>
+</head>
+<body>
+	<div id="map"></div>
+	<p id="demo"></p>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAd9zUsKZLDgJGlhM4hA0ujwitWK9-sQKU&libraries=places&callback=places_search_list"></script>
+</body>
+</html>
