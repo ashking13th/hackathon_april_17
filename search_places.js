@@ -7,10 +7,15 @@
 	var service;
 	var infowindow;
 	var results_global;
+	var latitude;
+	var longitude;
 
-	function places_search_list() 
+		function places_search_list(type) 
 			{
+				type = 'library';
+				getLocation();
 			  var client_location = {lat:26.872903 , lng: 80.881776};
+			  //var client_location = {lat: latitude , lng: longitude };
 
 
 			  map = new google.maps.Map(document.getElementById('map'), 
@@ -20,12 +25,11 @@
 																	    });
 			  var x = document.getElementById("demo");
 
-
 			  var request = {
 			    location: client_location,
-			    radius: '5000',
-			    //types: ['store']
-			    type: 'atm'
+			    radius: '7500',
+			    //types: ['store' , 'atm']
+			    type: type
 			  };
 
 			  infowindow = new google.maps.InfoWindow();
@@ -34,46 +38,43 @@
 			  service.nearbySearch(request, process_searches);
 			}
 
-	function process_searches(results, status) 
-	{
-		//var x = document.getElementById("demo");
-        if (status === google.maps.places.PlacesServiceStatus.OK) 
-        {
-	           results_global = results;
-	        for(var i = 0; i < results.length; i++)
-	          {
-	          		var ind_result = results_global[i];
-	          		//console.log(ind_result.formatted_address);
-	          		//document.write(ind_result.formatted_address);
-	          		/*x.innerHTML += "Index : " + i + "  ";
-	          		x.innerHTML += "Name  : " + ind_result.name + "<br>";
-	          		x.innerHTML += "lat long (" + ind_result.geometry.location + " , " + ind_result.geometry.location + "<br>";
-	          		x.innerHTML += "Address : " + ind_result.formatted_address + "<br><br>";*/
+		function process_searches(results, status) 
+		{
+	        if (status === google.maps.places.PlacesServiceStatus.OK) 
+	        {
+		           results_global = results;
+		           $("#fill").empty();
+		           var fill_place = document.getElementById('fill');
+		           fill_place.innerHTML = "<div id="+"test"+"></div>";
 
-	          		display(ind_result);
+		           if(results.length < 1)
+		           {
+		           	fill_place.innerHTML = "<div id="+"test"+"> No results found.</div>";
+		           }
 
-	          		//render on screen
+		        for(var i = 0; i < results.length; i++)
+		          {
+		          		var ind_result = results_global[i];
+		          		display(ind_result , i);
+		          }
+	        }
+	      }
 
-	          }
-        }
-      }
+	    function createMarker(place) 
+	    {
+	        var placeLoc = place.geometry.location;
+	        var marker = new google.maps.Marker({
+	          map: map,
+	          position: place.geometry.location
+	        });
 
-    function createMarker(place) 
-    {
-        var placeLoc = place.geometry.location;
-        var marker = new google.maps.Marker({
-          map: map,
-          position: place.geometry.location
-        });
+	        google.maps.event.addListener(marker, 'click', function() 
+													        {
+													          infowindow.setContent(place.name);
+													          infowindow.open(map, this);
+													        });
+	     }
 
-        google.maps.event.addListener(marker, 'click', function() 
-												        {
-												          infowindow.setContent(place.name);
-												          infowindow.open(map, this);
-												        });
-     }
-
-/*
       var x = document.getElementById("map");
 	function getLocation() 
 	{
@@ -87,54 +88,79 @@
 	}
 	function showPosition(position) 
 	{
-	    x.innerHTML = "Latitude: " + position.coords.latitude + 
-	    "<br>Longitude: " + position.coords.longitude; 
+	    latitude = position.coords.latitude; 
+	    longitude =  position.coords.longitude; 
 	}
-	*/
 
 	//UNDER CONSTRUCTION
 	//function to display the data in block format
 	function display(data , index)
-	{
-		//var x = document.getElementById("demo");
-		
+	{		
 		if(data)
-		{	//x.innerHTML += 'amrendra';
-			 /*var outer_div = document.createElement('div');
-			 outer_div.class = 'row pane';
-			 outer_div.id = index;
+		{	
+			var name = data.name;
+			
+			if(data.rating)
+			{
+				var rating = "Ratings : " + data.rating ;		
+			}
+			else
+			{
+				rating = " ";
+			}
 
-			 var img_div = document.createElement('div');
-			 img_div.class = 'col-xs-2';
+			 //$($('#change').first().clone().prop('id' , 'abc'+index )).appendTo("#test");
 
-			 var myimg = document.createElement('img');
-			 myimg.class = 'img-responsive';
-			 myimg.src = 'http://placehold.it/100x70';
+			 $('<a href=".query" id="'+index+'" class="query">'+
+                    '<div class="row pane">'+
 
-			 var place_div = document.createElement('div');
-			 place_div.class = 'col-xs-4';
-
-			 var place_head = document.createElement('h4');
-			 place_head.class = 'product-name';
-
-			 var strng = document.createElement('strong');
-			 strng.innerHTML = data.name;
-			 strng.innerHTML += "ashking";*/
-
-			 //var o_div = document.createElement()
-
-			 var itm = document.getElementById("change");
-			 var cln = itm.cloneNode(true);
-			 itm.appendChild(cln);
+                        '<div class="col-xs-2">'+'<img class="img-responsive" src="http:/'+'/placehold.it/100x70">'+
+                        '</div>'+
+                        '<div class="col-xs-4">'+
+                            '<h4 class="product-name">'+
+                            '<strong> '+ name
+                            +' </strong></h4><h4><small>' + rating
+                            + '</small></h4>'+
+                        '</div>'+
+                        '<div class="col-xs-6">'+
+                            '<div class="col-xs-6 text-right">'+
+                                '<h6><strong>25.00 <span class="text-muted">x</span></strong></h6>'+
+                            '</div>'+
+                            '<div class="col-xs-4">'+
+                                '<input type="text" class="form-control input-sm" value="1">'+
+                            '</div>'+
+                            '<div class="col-xs-2">'+
+                                '<button type="button" class="btn btn-link btn-xs">'+
+                                    '<span class="glyphicon glyphicon-trash"> </span>'+
+                                '</button>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '</a>').appendTo('#test')
 
 		}
-
-		function add_to_list()
-		{
-			var place_ok = caller.id()
-
-			arr.push(new AddrObj());
-		}
-
-
 	}
+
+		function add_to_list(time_spent)
+		{
+			var place_num = caller.id()
+			var this_place = results[place_num];
+
+			var open_hours = this_place.opening_hours.periods[0].open.time;
+			var close_hours = this_place.opening_hours.periods[0].close.time;
+			if (!close_hours) 
+			{
+				close_hours = 24;
+			}
+			var latitude = this_place.geometry.location.lat;
+			var longitude = this_place.geometry.location.long;
+
+			arr.push(new AddrObj(open_hours , close_hours , time_spent , latitude , longitude));
+		}
+
+
+		function process2()
+		{
+			$("#fill").empty();
+			places_search_list() ;
+		}
